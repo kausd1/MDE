@@ -10,7 +10,7 @@ $clientId = ""
 $clientSecret = ""
 
 # Tag you want to assign
-$tagName = "Whatsup"
+$tagName = "Tagged"
 $action="Add"
 
 # Defender for Endpoint API base URL
