@@ -13,9 +13,9 @@ if (-not (Get-Module -ListAvailable -Name ImportExcel)) {
 Import-Module ImportExcel
 
 # ===== CONFIGURATION =====
-$tenantId = "b9eec8cc-d1cc-4ab9-809f-896b4d420902"  # Replace with your tenant ID
-$appId = "593722e3-f5cf-4907-a6a6-a04f5d89fd01"       # Replace with your app ID
-$appSecret = "y8h8Q~Rme4ui~-HTNrZ.HY0z-~_POnv7auhVucqn"   # Replace with your app secret
+$tenantId = ""  # Replace with your tenant ID
+$appId = ""       # Replace with your app ID
+$appSecret = ""   # Replace with your app secret
 
 # File paths
 $inputExcelPath = "E:\Temp\HashValidationResults.xlsx"   # Path to input Excel file
@@ -175,3 +175,4 @@ try {
 }
 
 Write-Host "Script completed."
+
