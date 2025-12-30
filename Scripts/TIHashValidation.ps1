@@ -2,6 +2,12 @@
 # Microsoft Defender for Endpoint - Bulk File Hash Validation
 # This script reads file hashes from an Excel file and validates them
 # against the MDE Files API, exporting determination results
+# IMPORTANT: Your Excel file MUST have a column named "Indicator Value" containing the file hashes
+# Example Excel structure:
+# | Indicator Value                                                   |
+# |-------------------------------------------------------------------|
+# | 97bf5e1a903a978b2281496e0a897688e9d8e6f981238cf91e39bae20390defe |
+# | abc123def456...                              
 # ===================================================================
 
 # Check if ImportExcel module is installed, install if not
@@ -162,3 +168,4 @@ try {
 
 
 Write-Host "`nScript completed." -ForegroundColor Cyan
+
