@@ -1,14 +1,33 @@
-﻿# ===================================================================
+# ===================================================================
 # Microsoft Defender for Endpoint - Bulk File Hash Validation
 # This script reads file hashes from an Excel file and validates them
 # against the MDE Files API, exporting determination results
-# IMPORTANT: Your Excel file MUST have a column named "Indicator Value" containing the file hashes
-# Example Excel structure:
-# | Indicator Value                                                   |
-# |-------------------------------------------------------------------|
-# | 97bf5e1a903a978b2281496e0a897688e9d8e6f981238cf91e39bae20390defe |
-# | abc123def456...                              
+# 
+# IMPORTANT - Input File Requirements:
+# 1. File must be in .xlsx format (Excel file)
+# 2. Column containing hashes MUST be named "Indicator Value"
+# 3. If your input file is sourced from another system/tool, 
+#    rename the hash column to "Indicator Value" before running this script
+#
+# Prerequisites:
+# * Microsoft Entra ID App Registration with API permissions
+#   Follow Step 1 for tenantId, appId, appSecret:
+#   https://learn.microsoft.com/en-us/defender-endpoint/api/api-hello-world
+# * File.Read.All (Application) permission for this validation script
+# * PowerShell with ImportExcel module (will auto-install if missing)
+# * Network access to Microsoft Defender for Endpoint API
+#
+# Usage:
+# .\Script.ps1 -InputPath "C:\Temp\Hashes.xlsx" -OutputPath "C:\Temp\Results.xlsx"
 # ===================================================================
+
+param(
+    [Parameter(Mandatory=$false)]
+    [string]$InputPath = "C:\Temp\FileHashes.xlsx",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$OutputPath = "C:\Temp\HashValidationResults.xlsx"
+)
 
 # Check if ImportExcel module is installed, install if not
 if (-not (Get-Module -ListAvailable -Name ImportExcel)) {
@@ -23,9 +42,9 @@ $tenantId = ""  # Replace with your tenant ID
 $appId = ""       # Replace with your app ID
 $appSecret = ""   # Replace with your app secret
 
-# File paths
-$inputExcelPath = "E:\Temp\CustomHashEdit.xlsx"   # Path to input Excel file
-$outputExcelPath = "E:\Temp\HashValidationResults.xlsx"  # Path to output Excel file
+# Use parameters for file paths
+$inputExcelPath = $InputPath
+$outputExcelPath = $OutputPath
 
 # ===== STEP 1: Acquire OAuth Token =====
 Write-Host "Acquiring OAuth token..." -ForegroundColor Cyan
@@ -48,6 +67,13 @@ try {
 }
 
 # ===== STEP 2: Read Hashes from Excel =====
+# IMPORTANT: Your Excel file MUST have a column named "Indicator Value" containing the file hashes
+# Example Excel structure:
+# | Indicator Value                                                   |
+# |-------------------------------------------------------------------|
+# | 97bf5e1a903a978b2281496e0a897688e9d8e6f981238cf91e39bae20390defe |
+# | abc123def456...                                                   |
+
 Write-Host "Reading hashes from Excel file: $inputExcelPath" -ForegroundColor Cyan
 
 if (-not (Test-Path $inputExcelPath)) {
@@ -70,6 +96,7 @@ $counter = 0
 foreach ($row in $hashData) {
     $counter++
     # Read hash from "Indicator Value" column
+    # NOTE: The Excel column name MUST be exactly "Indicator Value" (case-sensitive with space)
     $hash = $row.'Indicator Value'
     
     if ([string]::IsNullOrWhiteSpace($hash)) {
@@ -134,6 +161,14 @@ foreach ($row in $hashData) {
         
         $result.ResponseStatus = "Success"
         
+        # Color-coded console output
+        switch ($result.determinationType) {
+            "Malware"  { Write-Host "  Result: MALICIOUS - $($result.determinationType)" -ForegroundColor Red }
+            "Suspicious" { Write-Host "  Result: SUSPICIOUS - $($result.determinationType)" -ForegroundColor Yellow }
+            "Clean"      { Write-Host "  Result: CLEAN" -ForegroundColor Green }
+            default      { Write-Host "  Result: UNKNOWN (No determination)" -ForegroundColor Gray }
+        }
+        
     } catch {
         $result.ResponseStatus = "Error: $($_.Exception.Message)"
         Write-Host "  Error processing hash: $($_.Exception.Message)" -ForegroundColor Red
@@ -166,6 +201,4 @@ try {
     Write-Error "Failed to export results: $($_.Exception.Message)"
 }
 
-
 Write-Host "`nScript completed." -ForegroundColor Cyan
-
