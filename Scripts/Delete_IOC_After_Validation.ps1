@@ -10,6 +10,14 @@
 #    rename the hash columns to "sha256" or "sha1" before running this script
 # 4. You will be prompted to select which column to use (sha256 or sha1)
 #
+# Prerequisites:
+# * Microsoft Entra ID App Registration with API permissions
+#   Follow the above step for tenantId, appId, appSecret:
+#   https://learn.microsoft.com/en-us/defender-endpoint/api/api-hello-world
+# * Ti.ReadWrite.All (Application) permission for this deletion script
+# * PowerShell with ImportExcel module (will auto-install if missing)
+# * Network access to Microsoft Defender for Endpoint API
+#
 # Usage:
 # .\Script.ps1 -InputPath "C:\Temp\HashValidationResults.xlsx" -OutputPath "C:\Temp\DeletionResults.xlsx"
 # ===================================================================
@@ -193,4 +201,5 @@ try {
 }
 
 Write-Host "Script completed."
+
 
