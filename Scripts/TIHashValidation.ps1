@@ -8,7 +8,6 @@
 # 2. Column containing hashes MUST be named "Indicator Value"
 # 3. If your input file is sourced from another system/tool, 
 #    rename the hash column to "Indicator Value" before running this script
-# Retrieves a File by identifier Sha1, or Sha256
 #
 # Prerequisites:
 # * Microsoft Entra ID App Registration with API permissions
@@ -24,10 +23,10 @@
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$InputPath = "C:\Temp\FileHashes.xlsx",
+    [string]$InputPath = "E:\temp\Validate1.xlsx",
     
     [Parameter(Mandatory=$false)]
-    [string]$OutputPath = "C:\Temp\HashValidationResults.xlsx"
+    [string]$OutputPath = "E:\temp\Validated2.xlsx"
 )
 
 # Check if ImportExcel module is installed, install if not
@@ -192,15 +191,30 @@ Write-Host "`nExporting results to: $outputExcelPath" -ForegroundColor Cyan
 try {
     $results | Export-Excel -Path $outputExcelPath -AutoSize -FreezeTopRow -BoldTopRow -AutoFilter -WorksheetName "Hash Validation Results"
     Write-Host "Export completed successfully!" -ForegroundColor Green
-    Write-Host "`nSummary:" -ForegroundColor Cyan
-    Write-Host "  Total processed: $($results.Count)" -ForegroundColor White
-    Write-Host "  Malicious: $(($results | Where-Object {$_.determinationType -eq 'Malicious'}).Count)" -ForegroundColor Red
-    Write-Host "  Suspicious: $(($results | Where-Object {$_.determinationType -eq 'Suspicious'}).Count)" -ForegroundColor Yellow
-    Write-Host "  Clean: $(($results | Where-Object {$_.determinationType -eq 'Clean'}).Count)" -ForegroundColor Green
-    Write-Host "  Unknown: $(($results | Where-Object {$_.determinationType -eq 'Unknown'}).Count)" -ForegroundColor Gray
+
+    # Reliable counting: force arrays with @(...)
+$malwareCount    = @($results | Where-Object { ($_.determinationType -as [string]).Trim() -in @("Malware","Malicious") }).Count
+$puaCount        = @($results | Where-Object { ($_.determinationType -as [string]).Trim() -eq "Pua" }).Count
+$suspiciousCount = @($results | Where-Object { ($_.determinationType -as [string]).Trim() -eq "Suspicious" }).Count
+$cleanCount      = @($results | Where-Object { ($_.determinationType -as [string]).Trim() -eq "Clean" }).Count
+$unknownCount    = @($results | Where-Object {
+    $dt = ($_.determinationType -as [string]).Trim()
+    [string]::IsNullOrWhiteSpace($dt) -or $dt -eq "Unknown"
+}).Count
+
+Write-Host "`nSummary:" -ForegroundColor Cyan
+Write-Host "  Total processed: $($results.Count)" -ForegroundColor White
+Write-Host "  Malware/Malicious: $malwareCount" -ForegroundColor Red
+Write-Host "  PUA: $puaCount" -ForegroundColor Magenta
+Write-Host "  Suspicious: $suspiciousCount" -ForegroundColor Yellow
+Write-Host "  Clean: $cleanCount" -ForegroundColor Green
+Write-Host "  Unknown: $unknownCount" -ForegroundColor Gray
+
+    # Optional: show breakdown of all determinationType values
+    # $results | Group-Object determinationType | Sort-Object Count -Descending | Format-Table Count, Name -AutoSize
+
 } catch {
     Write-Error "Failed to export results: $($_.Exception.Message)"
 }
 
 Write-Host "`nScript completed." -ForegroundColor Cyan
-
