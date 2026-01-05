@@ -1,15 +1,25 @@
-﻿# ===================================================================
-# Microsoft Defender for Endpoint - Bulk File Hash Validation
-# This script reads file hashes from an Excel file and validates them
-# against the MDE Files API, exporting determination results
+# ===================================================================
+# Microsoft Defender for Endpoint - Bulk Indicator Deletion
+# This script reads hashes from HashValidationResults.xlsx and deletes
+# the corresponding indicators from the MDE portal
+#
+# Usage:
+#use xlsx as file extension
+# .\Script.ps1 -InputPath "C:\Temp\HashValidationResults.xlsx" -OutputPath "C:\Temp\DeletionResults.xlsx"
 # ===================================================================
 
-# Check if ImportExcel module is installed, install if not
+param(
+    [Parameter(Mandatory=$false)]
+    [string]$InputPath = "C:\Temp\HashValidationResults.xlsx",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$OutputPath = "C:\Temp\IndicatorDeletionResults.xlsx"
+)
+
 if (-not (Get-Module -ListAvailable -Name ImportExcel)) {
-    Write-Host "Installing ImportExcel module..." -ForegroundColor Yellow
+    Write-Host "Installing ImportExcel module..."
     Install-Module -Name ImportExcel -Scope CurrentUser -Force
 }
-
 Import-Module ImportExcel
 
 # ===== CONFIGURATION =====
@@ -18,8 +28,9 @@ $appId = ""       # Replace with your app ID
 $appSecret = ""   # Replace with your app secret
 
 # File paths
-$inputExcelPath = "E:\Temp\HashValidationResults.xlsx"   # Path to input Excel file
-$outputExcelPath = "E:\Temp\IndicatorDeletionResults.xlsx"  # Path to output Excel file
+# Use parameters for file paths
+$inputExcelPath = $InputPath
+$outputExcelPath = $OutputPath
 
 # ===== STEP 1: Acquire OAuth Token =====
 Write-Host "Acquiring OAuth token..."
@@ -59,6 +70,7 @@ try {
 
 # ===== STEP 3: Prompt User to Select Column =====
 Write-Host "Select hash type to use for deletion:"
+Write-Host "Column name should either be sha256 or sha1"
 Write-Host "  1. sha256"
 Write-Host "  2. sha1"
 Write-Host "Enter your choice (1 or 2): " -NoNewline
@@ -175,4 +187,3 @@ try {
 }
 
 Write-Host "Script completed."
-
