@@ -3,8 +3,14 @@
 # This script reads hashes from HashValidationResults.xlsx and deletes
 # the corresponding indicators from the MDE portal
 #
+# IMPORTANT - Input File Requirements:
+# 1. File must be in .xlsx format (Excel file)
+# 2. File must contain columns named "sha256" and/or "sha1" with hash values
+# 3. If your input file is sourced from another system/tool,
+#    rename the hash columns to "sha256" or "sha1" before running this script
+# 4. You will be prompted to select which column to use (sha256 or sha1)
+#
 # Usage:
-#use xlsx as file extension
 # .\Script.ps1 -InputPath "C:\Temp\HashValidationResults.xlsx" -OutputPath "C:\Temp\DeletionResults.xlsx"
 # ===================================================================
 
@@ -187,3 +193,4 @@ try {
 }
 
 Write-Host "Script completed."
+
