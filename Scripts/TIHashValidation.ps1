@@ -8,6 +8,7 @@
 # 2. Column containing hashes MUST be named "Indicator Value"
 # 3. If your input file is sourced from another system/tool, 
 #    rename the hash column to "Indicator Value" before running this script
+# Retrieves a File by identifier Sha1, or Sha256
 #
 # Prerequisites:
 # * Microsoft Entra ID App Registration with API permissions
@@ -202,3 +203,4 @@ try {
 }
 
 Write-Host "`nScript completed." -ForegroundColor Cyan
+
